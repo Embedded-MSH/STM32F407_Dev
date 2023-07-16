@@ -1,9 +1,8 @@
-#include "stm32f4xx.h"
+#include "main.h"
 
-#ifdef __cplusplus
+
 extern "C"
 {
-#endif /* __cplusplus */
     void _close(void)
     {
     }
@@ -16,64 +15,93 @@ extern "C"
     void _write(void)
     {
     }
-#ifdef __cplusplus
+    void _kill(void)
+    {
+    }
+    void _getpid(void)
+    {
+    }
 }
-#endif /* __cplusplus */
 
 void setLedBlue(bool state)
 {
     if (!state)
-        GPIOB->BSRR |= GPIO_BSRR_BS2;
+        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_RESET);
     else
-        GPIOB->BSRR |= GPIO_BSRR_BR2;
+        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_SET);
 }
 
 void setLedRed(bool state)
 {
     if (!state)
-        GPIOC->BSRR |= GPIO_BSRR_BS5;
+        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_RESET);
     else
-        GPIOC->BSRR |= GPIO_BSRR_BR5;
+        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_SET);
 }
 
 void sleepSecond(int second)
 {
-    for (int i = 0; i < second * 1000000; i++)
-        __asm__("nop");
+    HAL_Delay(second * 1000);
+}
+
+
+void GPIOC5_REDLED_Init(void)
+{
+    GPIO_InitTypeDef GPIO_InitStruct = { 0 };
+
+    __HAL_RCC_GPIOC_CLK_ENABLE();
+
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_RESET);
+
+    GPIO_InitStruct.Pin = GPIO_PIN_5;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+}
+
+void GPIOB2_BLUELED_Init(void)
+{
+    GPIO_InitTypeDef GPIO_InitStruct = { 0 };
+
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_RESET);
+
+    GPIO_InitStruct.Pin = GPIO_PIN_2;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+}
+
+// This prevent name mangling for functions used in C/assembly files.
+extern "C"
+{
+    void SysTick_Handler(void)
+    {
+        HAL_IncTick();   // SysTick定时器是由HAL库进行管理的,用于生成系统滴答定时和延时函数。HAL需要通过重写SysTick
+                         // 调用 IncTick 获取滴答。
+
+        // 1 Hz blinking
+        if ((HAL_GetTick() % 500) == 0) {
+            HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_5);
+            HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_2);
+        }
+    }
 }
 
 int main(void)
 {
-    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;
-    GPIOC->MODER &= ~GPIO_MODER_MODER5;
-    GPIOC->MODER |= GPIO_MODER_MODER5_0;
-    GPIOC->OTYPER &= ~GPIO_OTYPER_OT_5;
-    GPIOC->OTYPER |= (0 << 5);
-    GPIOC->OSPEEDR &= ~GPIO_OSPEEDER_OSPEEDR5;
-    GPIOC->OSPEEDR |= (0 << 2 * 5);
-    GPIOC->PUPDR &= ~GPIO_PUPDR_PUPDR5;
-    GPIOC->PUPDR |= GPIO_PUPDR_PUPDR5_1;
-    setLedRed(true);
-
-    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
-    GPIOB->MODER &= ~GPIO_MODER_MODER2;
-    GPIOB->MODER |= GPIO_MODER_MODER2_0;
-    GPIOB->OTYPER &= ~(GPIO_OTYPER_OT_2);
-    GPIOB->OTYPER |= (0 << 2);
-    GPIOB->OSPEEDR &= ~GPIO_OSPEEDER_OSPEEDR2;
-    GPIOB->OSPEEDR |= (0 << 2 * 2);
-    GPIOB->PUPDR &= ~GPIO_PUPDR_PUPDR2;
-    GPIOB->PUPDR |= GPIO_PUPDR_PUPDR2_1;
-    setLedBlue(true);
-
-    while (1) {
-        setLedRed(false);
-        setLedBlue(true);
-        sleepSecond(2);
-        setLedRed(true);
-        setLedBlue(false);
-        sleepSecond(2);
+    HAL_StatusTypeDef ret = HAL_Init();
+    if (ret != HAL_OK) {
+        while (1) { }
     }
+    GPIOB2_BLUELED_Init();
+    GPIOC5_REDLED_Init();
+
+    HAL_SYSTICK_Config(SystemCoreClock / 1000);
+    while (1) { }
 
     return 0;
 }
