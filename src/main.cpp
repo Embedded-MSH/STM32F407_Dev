@@ -1,19 +1,26 @@
 #include "stm32f4xx.h"
 
-void _close(void)
+#ifdef __cplusplus
+extern "C"
 {
+#endif /* __cplusplus */
+    void _close(void)
+    {
+    }
+    void _lseek(void)
+    {
+    }
+    void _read(void)
+    {
+    }
+    void _write(void)
+    {
+    }
+#ifdef __cplusplus
 }
-void _lseek(void)
-{
-}
-void _read(void)
-{
-}
-void _write(void)
-{
-}
+#endif /* __cplusplus */
 
-void setLedBlue(int state)
+void setLedBlue(bool state)
 {
     if (!state)
         GPIOB->BSRR |= GPIO_BSRR_BS2;
@@ -21,12 +28,18 @@ void setLedBlue(int state)
         GPIOB->BSRR |= GPIO_BSRR_BR2;
 }
 
-void setLedRed(int state)
+void setLedRed(bool state)
 {
     if (!state)
         GPIOC->BSRR |= GPIO_BSRR_BS5;
     else
         GPIOC->BSRR |= GPIO_BSRR_BR5;
+}
+
+void sleepSecond(int second)
+{
+    for (int i = 0; i < second * 1000000; i++)
+        __asm__("nop");
 }
 
 int main(void)
@@ -40,7 +53,7 @@ int main(void)
     GPIOC->OSPEEDR |= (0 << 2 * 5);
     GPIOC->PUPDR &= ~GPIO_PUPDR_PUPDR5;
     GPIOC->PUPDR |= GPIO_PUPDR_PUPDR5_1;
-    setLedRed(1);
+    setLedRed(true);
 
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
     GPIOB->MODER &= ~GPIO_MODER_MODER2;
@@ -51,17 +64,15 @@ int main(void)
     GPIOB->OSPEEDR |= (0 << 2 * 2);
     GPIOB->PUPDR &= ~GPIO_PUPDR_PUPDR2;
     GPIOB->PUPDR |= GPIO_PUPDR_PUPDR2_1;
-    setLedBlue(1);
+    setLedBlue(true);
 
     while (1) {
-        setLedRed(0);
-        setLedBlue(1);
-        for (int i = 0; i < 1000000; i++)
-            ;
-        setLedRed(1);
-        setLedBlue(0);
-        for (int i = 0; i < 1000000; i++)
-            ;
+        setLedRed(false);
+        setLedBlue(true);
+        sleepSecond(2);
+        setLedRed(true);
+        setLedBlue(false);
+        sleepSecond(2);
     }
 
     return 0;

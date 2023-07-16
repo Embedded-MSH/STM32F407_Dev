@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/cmake/stm32_gcc.cmake)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-project(stm32-template C ASM)
+project(stm32-template C CXX ASM)
 
 # ############## CONFIGURATION #################################################
 set(OPENOCD_INTERFACE cmsis-dap.cfg)
@@ -15,13 +15,12 @@ find_package(
   CMSIS
   COMPONENTS ${STM32_TYPE}
   REQUIRED)
-
 # Find CMSIS for all F4 devices: find_package(CMSIS COMPONENTS STM32F4 REQUIRED)
 # Find CMSIS for all devices: find_package(CMSIS REQUIRED)
 set(LOCAL_LINKER_SYMBOL -Wl,--no-warn-rwx-segments CMSIS::${CMSIS_TYPE}
                         STM32::NoSys)
 
-set(PROJECT_SOURCES src/main.c)
+set(PROJECT_SOURCES src/main.cpp)
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
   message("Debug mode")
