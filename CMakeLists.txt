@@ -9,16 +9,24 @@ set(OPENOCD_INTERFACE cmsis-dap.cfg)
 set(OPENOCD_TARGET stm32f4x.cfg)
 set(STM32_TYPE STM32F407VE)
 set(CMSIS_TYPE STM32::F407VE)
+set(HAL_TYPE STM32::F4)
 # ##############################################################################
 
 find_package(
   CMSIS
   COMPONENTS ${STM32_TYPE}
   REQUIRED)
-# Find CMSIS for all F4 devices: find_package(CMSIS COMPONENTS STM32F4 REQUIRED)
-# Find CMSIS for all devices: find_package(CMSIS REQUIRED)
-set(LOCAL_LINKER_SYMBOL -Wl,--no-warn-rwx-segments CMSIS::${CMSIS_TYPE}
-                        STM32::NoSys)
+
+find_package(
+  HAL
+  COMPONENTS ${STM32_TYPE} RCC GPIO CORTEX
+  REQUIRED)
+
+set(LOCAL_LINKER_SYMBOL
+    -Wl,--no-warn-rwx-segments HAL::${HAL_TYPE}::RCC HAL::${HAL_TYPE}::GPIO
+    HAL::${HAL_TYPE}::CORTEX CMSIS::${CMSIS_TYPE} STM32::NoSys)
+
+include_directories(./Include/)
 
 set(PROJECT_SOURCES src/main.cpp)
 
