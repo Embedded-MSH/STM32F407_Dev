@@ -39,7 +39,8 @@ if(CMAKE_BUILD_TYPE STREQUAL Debug)
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME}-debug.elf
             ${PROJECT_NAME}-debug-stripped.elf
-    COMMAND ${CMAKE_STRIP} ${PROJECT_NAME}-debug-stripped.elf)
+    COMMAND ${CMAKE_STRIP} ${PROJECT_NAME}-debug-stripped.elf
+    BYPRODUCTS ${PROJECT_NAME}-debug-stripped.elf)
   stm32_print_size_of_target(${PROJECT_NAME}-debug)
   set(burn_target ${PROJECT_NAME}-debug-stripped.elf)
 else()
