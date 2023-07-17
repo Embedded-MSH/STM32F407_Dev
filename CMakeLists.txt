@@ -12,6 +12,7 @@ set(CMSIS_TYPE STM32::F407VE)
 set(HAL_TYPE STM32::F4)
 # ##############################################################################
 
+set(CMAKE_CXX_STANDARD 11)
 find_package(
   CMSIS
   COMPONENTS ${STM32_TYPE}
@@ -27,8 +28,7 @@ set(LOCAL_LINKER_SYMBOL
     HAL::${HAL_TYPE}::CORTEX CMSIS::${CMSIS_TYPE} STM32::NoSys)
 
 include_directories(./Include/)
-
-set(PROJECT_SOURCES src/main.cpp)
+set(PROJECT_SOURCES src/main.cpp src/Led.cpp)
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
   message("Debug mode")

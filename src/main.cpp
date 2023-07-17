@@ -1,6 +1,6 @@
 #include "main.h"
 
-
+#include "Led.h"
 extern "C"
 {
     void _close(void)
@@ -23,57 +23,11 @@ extern "C"
     }
 }
 
-void setLedBlue(bool state)
-{
-    if (!state)
-        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_RESET);
-    else
-        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_SET);
-}
-
-void setLedRed(bool state)
-{
-    if (!state)
-        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_RESET);
-    else
-        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_SET);
-}
-
 void sleepSecond(int second)
 {
     HAL_Delay(second * 1000);
 }
 
-
-void GPIOC5_REDLED_Init(void)
-{
-    GPIO_InitTypeDef GPIO_InitStruct = { 0 };
-
-    __HAL_RCC_GPIOC_CLK_ENABLE();
-
-    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_RESET);
-
-    GPIO_InitStruct.Pin = GPIO_PIN_5;
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-}
-
-void GPIOB2_BLUELED_Init(void)
-{
-    GPIO_InitTypeDef GPIO_InitStruct = { 0 };
-
-    __HAL_RCC_GPIOB_CLK_ENABLE();
-
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_RESET);
-
-    GPIO_InitStruct.Pin = GPIO_PIN_2;
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-}
 
 // This prevent name mangling for functions used in C/assembly files.
 extern "C"
@@ -84,9 +38,9 @@ extern "C"
                          // 调用 IncTick 获取滴答。
 
         // 1 Hz blinking
-        if ((HAL_GetTick() % 500) == 0) {
-            HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_5);
-            HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_2);
+        if ((HAL_GetTick() % 100) == 0) {
+            LedCtrl::instance()->toggleLed(LedCtrl::LED::RED);
+            LedCtrl::instance()->toggleLed(LedCtrl::LED::BLUE);
         }
     }
 }
@@ -97,8 +51,9 @@ int main(void)
     if (ret != HAL_OK) {
         while (1) { }
     }
-    GPIOB2_BLUELED_Init();
-    GPIOC5_REDLED_Init();
+    auto ledctrl = LedCtrl::instance();
+    ledctrl->init(LedCtrl::LED::RED);
+    ledctrl->init(LedCtrl::LED::BLUE);
 
     HAL_SYSTICK_Config(SystemCoreClock / 1000);
     while (1) { }
