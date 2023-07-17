@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/cmake/stm32_gcc.cmake)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-project(stm32-template C CXX ASM)
+project(stm32-template C ASM)
 
 # ############## CONFIGURATION #################################################
 set(OPENOCD_INTERFACE cmsis-dap.cfg)
@@ -28,7 +28,7 @@ set(LOCAL_LINKER_SYMBOL
 
 include_directories(./Include/)
 
-set(PROJECT_SOURCES src/main.cpp)
+set(PROJECT_SOURCES src/main.c src/led.c)
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
   message("Debug mode")
