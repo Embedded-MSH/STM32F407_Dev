@@ -1,8 +1,7 @@
 #pragma once
 
-#include "main.h"
-
 #include <memory>
+#include <stm32f4xx_hal.h>
 #include <unordered_map>
 
 class LedCtrl

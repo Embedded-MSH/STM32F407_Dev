@@ -1,6 +1,5 @@
 #include "Led.h"
 
-#include <stm32f4xx_hal.h>
 
 LedCtrl::LedCtrl()
 {

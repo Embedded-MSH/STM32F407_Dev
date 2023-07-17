@@ -38,7 +38,7 @@ extern "C"
                          // 调用 IncTick 获取滴答。
 
         // 1 Hz blinking
-        if ((HAL_GetTick() % 100) == 0) {
+        if ((HAL_GetTick() % 1000) == 0) {
             LedCtrl::instance()->toggleLed(LedCtrl::LED::RED);
             LedCtrl::instance()->toggleLed(LedCtrl::LED::BLUE);
         }
