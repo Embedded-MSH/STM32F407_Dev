@@ -28,7 +28,7 @@ set(LOCAL_LINKER_SYMBOL
 
 include_directories(./Include/)
 
-set(PROJECT_SOURCES src/main.c src/led.c src/mock.c)
+set(PROJECT_SOURCES src/main.c src/led.c src/mock.c src/key.c src/msp.c)
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
   message("Debug mode")
