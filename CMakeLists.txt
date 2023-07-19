@@ -10,6 +10,9 @@ set(OPENOCD_TARGET stm32f4x.cfg)
 set(STM32_TYPE STM32F407VE)
 set(CMSIS_TYPE STM32::F407VE)
 set(HAL_TYPE STM32::F4)
+
+set(OPENOCD_SCRIPTS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/openocd.cfg")
+message("OPENOCD_SCRIPTS_PATH: ${OPENOCD_SCRIPTS_PATH}")
 # ##############################################################################
 
 find_package(
@@ -19,19 +22,34 @@ find_package(
 
 find_package(
   HAL
-  COMPONENTS ${STM32_TYPE} RCC GPIO CORTEX
+  COMPONENTS ${STM32_TYPE}
+             RCC
+             GPIO
+             CORTEX
+             UART
+             USART
+             DMA
   REQUIRED)
 
 set(LOCAL_LINKER_SYMBOL
-    -Wl,--no-warn-rwx-segments HAL::${HAL_TYPE}::RCC HAL::${HAL_TYPE}::GPIO
-    HAL::${HAL_TYPE}::CORTEX CMSIS::${CMSIS_TYPE} STM32::NoSys)
+    -Wl,--no-warn-rwx-segments
+    HAL::${HAL_TYPE}::RCC
+    HAL::${HAL_TYPE}::GPIO
+    HAL::${HAL_TYPE}::CORTEX
+    HAL::${HAL_TYPE}::UART
+    HAL::${HAL_TYPE}::USART
+    HAL::${HAL_TYPE}::DMA
+    CMSIS::${CMSIS_TYPE}
+    STM32::NoSys)
 
 include_directories(./Include/)
 
-set(PROJECT_SOURCES src/main.c src/led.c src/mock.c src/key.c src/msp.c)
-
+set(PROJECT_SOURCES src/main.c src/led.c src/mock.c src/key.c src/msp.c
+                    src/usart.c)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Dprintf=printf_hook")
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
-  message("Debug mode")
+  message("Debug
+  mode")
   add_executable(${PROJECT_NAME}-debug ${PROJECT_SOURCES})
   target_link_libraries(${PROJECT_NAME}-debug ${LOCAL_LINKER_SYMBOL})
   add_custom_command(
@@ -44,7 +62,9 @@ if(CMAKE_BUILD_TYPE STREQUAL Debug)
   stm32_print_size_of_target(${PROJECT_NAME}-debug)
   set(burn_target ${PROJECT_NAME}-debug-stripped.elf)
 else()
-  message("Release mode")
+  message("Release
+  mode
+  ")
   add_executable(${PROJECT_NAME}-release ${PROJECT_SOURCES})
   target_link_libraries(${PROJECT_NAME}-release ${LOCAL_LINKER_SYMBOL})
   add_custom_command(
@@ -55,11 +75,8 @@ else()
   set(burn_target ${PROJECT_NAME}-release.elf)
 endif()
 
-set(OPENOCD_SCRIPTS_PATH "/usr/share/openocd/scripts")
 add_custom_target(
   burn
-  COMMAND
-    openocd -f ${OPENOCD_SCRIPTS_PATH}/interface/${OPENOCD_INTERFACE} -f
-    ${OPENOCD_SCRIPTS_PATH}/target/${OPENOCD_TARGET} -c \"program
-    ${CMAKE_CURRENT_BINARY_DIR}/${burn_target} verify reset exit\"
+  COMMAND openocd -f ${OPENOCD_SCRIPTS_PATH} -d -c \"program
+          ${CMAKE_CURRENT_BINARY_DIR}/${burn_target} verify reset exit\"
   DEPENDS ${burn_target})

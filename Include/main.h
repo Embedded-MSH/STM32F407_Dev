@@ -1,5 +1,5 @@
-#ifndef __MAIN_H
-#define __MAIN_H
+#ifndef __MAIN_H__
+#define __MAIN_H__
 
 #include "stm32f4xx_hal.h"
 
@@ -8,4 +8,4 @@ void Error_Handler(void);
 void sleepSecond(int second);
 
 
-#endif /* __MAIN_H */
+#endif   //! __MAIN_H__
