@@ -5,7 +5,7 @@
 
 void Error_Handler(void);
 
-void sleepSecond(int second);
+void sleepSecond(double second);
 
 
 #endif   //! __MAIN_H__

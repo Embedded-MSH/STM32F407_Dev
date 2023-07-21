@@ -22,7 +22,7 @@ void SysTick_Handler(void)
                      // 调用 IncTick 获取滴答。
 }
 
-void sleepSecond(int second)
+void sleepSecond(double second)
 {
     HAL_Delay(second * 1000);
 }
