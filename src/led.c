@@ -19,7 +19,7 @@ static void led_init_one(enum led_id id)
 
     GPIO_InitStruct.Pin = gpio_pin;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(gpio_port, &GPIO_InitStruct);
 }
