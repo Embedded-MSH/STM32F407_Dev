@@ -29,7 +29,7 @@ static void led_set_one(enum led_id id, enum led_state state)
 {
     GPIO_TypeDef* gpio_port = id == LED_BLUE ? LED_BLUE_GPIO : LED_RED_GPIO;
     unsigned int gpio_pin = id == LED_BLUE ? LED_BLUE_PIN : LED_RED_PIN;
-    GPIO_PinState pin_state = state == LED_ON ? GPIO_PIN_SET : GPIO_PIN_RESET;
+    GPIO_PinState pin_state = state == LED_ON ? GPIO_PIN_RESET : GPIO_PIN_SET;
     HAL_GPIO_WritePin(gpio_port, gpio_pin, pin_state);
 }
 

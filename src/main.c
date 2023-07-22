@@ -7,41 +7,61 @@
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
     if (GPIO_Pin == KEY1_Pin) {
-        led_toggle(LED_RED);
+        printf("KEY1 被按下\n");
+        USART3_SendString("STM32 ON");
+        led_set(LED_RED, LED_ON);
     } else if (GPIO_Pin == KEY2_Pin) {
-        led_toggle(LED_BLUE);
+        printf("KEY2 被按下\n");
+        USART3_SendString("STM32 OFF");
+        led_set(LED_RED, LED_OFF);
     } else if (GPIO_Pin == KEY3_Pin) {
+        printf("KEY3 被按下\r\n");
+        HAL_UART_Transmit_IT(&huart3, (uint8_t*)"status\r\n", 9);
         led_toggle(LED_BLUE);
         led_toggle(LED_RED);
     }
 }
+#define REC_LENGTH 1
+#define MAX_REC_LENGTH 1024
 
+unsigned char UART1_Rx_Buf[MAX_REC_LENGTH];
+unsigned char UART1_Rx_flg;
+unsigned int UART1_Rx_cnt;
+unsigned char UART1_temp[REC_LENGTH];
 
-uint8_t usart1_rxData[5];
-uint8_t usart2_rxData[5];
-uint8_t usart3_rxData[5];
+unsigned char UART2_Rx_Buf[MAX_REC_LENGTH];
+unsigned char UART2_Rx_flg;
+unsigned int UART2_Rx_cnt;
+unsigned char UART2_temp[REC_LENGTH];
+
+unsigned char UART3_Rx_Buf[MAX_REC_LENGTH];
+unsigned char UART3_Rx_flg;
+unsigned int UART3_Rx_cnt;
+unsigned char UART3_temp[REC_LENGTH];
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
 {
     if (huart->Instance == USART1) {
-        printf("USART1 接收到数据：%s\r\n", usart1_rxData);
-        if (usart1_rxData[0] == 0x61) {
-            led_toggle(LED_BLUE);
-            printf("切换蓝灯\r\n");
+        UART1_Rx_Buf[UART1_Rx_cnt] = UART1_temp[0];
+        UART1_Rx_cnt++;
+        if (0x0a == UART1_temp[0]) {
+            UART1_Rx_flg = 1;
         }
-        if (usart1_rxData[0] == 0x62) {
-            led_toggle(LED_RED);
-            printf("切换红灯\r\n");
-        }
-        HAL_UART_Transmit_IT(&huart2, usart1_rxData, 5);
-        // USART2_SendData(usart1_rxData, 5);
-        HAL_UART_Receive_IT(&huart1, usart1_rxData, 5);
+        HAL_UART_Receive_IT(&huart1, (uint8_t*)UART1_temp, REC_LENGTH);
     } else if (huart->Instance == USART2) {
-        printf("USART2 接收到数据：%s\r\n", usart1_rxData);
-        HAL_UART_Transmit_IT(&huart3, usart2_rxData, 5);
-        HAL_UART_Receive_IT(&huart2, usart2_rxData, 5);
+        UART2_Rx_Buf[UART2_Rx_cnt] = UART2_temp[0];
+        UART2_Rx_cnt++;
+        if (0x0a == UART2_temp[0]) {
+            UART2_Rx_flg = 1;
+        }
+        HAL_UART_Receive_IT(&huart2, (uint8_t*)UART2_temp, REC_LENGTH);
     } else if (huart->Instance == USART3) {
-        printf("USART3 接收到数据：%s\r\n", usart1_rxData);
-        HAL_UART_Receive_IT(&huart3, usart3_rxData, 5);
+        // printf("USART3 接收到数据: %s\r\n", UART3_temp);
+        UART3_Rx_Buf[UART3_Rx_cnt] = UART3_temp[0];
+        UART3_Rx_cnt++;
+        if (0x0a == UART3_temp[0]) {
+            UART3_Rx_flg = 1;
+        }
+        HAL_UART_Receive_IT(&huart3, (uint8_t*)UART3_temp, REC_LENGTH);
     }
 }
 
@@ -59,14 +79,59 @@ int main(void)
     led_init(LED_BLUE);
     led_init(LED_RED);
     key_init();
-    USART1_Init(115200);
-    USART2_Init(115200);
+    // USART1_Init(115200);
+    // USART2_Init(115200);
     USART3_Init(115200);
 
-    HAL_UART_Receive_IT(&huart1, usart1_rxData, 5);
-    HAL_UART_Receive_IT(&huart2, usart2_rxData, 5);
-    HAL_UART_Receive_IT(&huart3, usart3_rxData, 5);
-    while (1) { }
+    // HAL_UART_Receive_IT(&huart1, UART1_temp, REC_LENGTH);
+    // HAL_UART_Receive_IT(&huart2, usart2_rxData, 1);
+    HAL_UART_Receive_IT(&huart3, UART2_temp, REC_LENGTH);
+    while (1) {
+        // led_toggle(LED_BLUE);
+        // sleepSecond(0.5);
+        if (UART1_Rx_flg) {
+            HAL_UART_Transmit(&huart1,
+                              UART1_Rx_Buf,
+                              UART1_Rx_cnt,
+                              0x10);   // 发送接收到的数据
+            for (int i = 0; i < UART1_Rx_cnt; i++)
+                UART1_Rx_Buf[i] = 0;
+            UART1_Rx_cnt = 0;
+            UART1_Rx_flg = 0;
+        }
+
+        if (UART2_Rx_flg) {
+            HAL_UART_Transmit(&huart2,
+                              UART2_Rx_Buf,
+                              UART2_Rx_cnt,
+                              0x10);   // 发送接收到的数据
+            for (int i = 0; i < UART2_Rx_cnt; i++)
+                UART2_Rx_Buf[i] = 0;
+            UART2_Rx_cnt = 0;
+            UART2_Rx_flg = 0;
+        }
+
+        if (UART3_Rx_flg) {
+            // HAL_UART_Transmit(&huart3,
+            //                   UART3_Rx_Buf,
+            //                   UART3_Rx_cnt,
+            //                   0x10);   // 发送接收到的数据
+            if (UART3_Rx_Buf[0] == 'H' && UART3_Rx_Buf[1] == 'A'
+                && UART3_Rx_Buf[2] == 'O' && UART3_Rx_Buf[3] == 'N') {
+                led_set(LED_BLUE, LED_ON);
+                led_set(LED_RED, LED_ON);
+            } else if (UART3_Rx_Buf[0] == 'H' && UART3_Rx_Buf[1] == 'A'
+                       && UART3_Rx_Buf[2] == 'O' && UART3_Rx_Buf[3] == 'F'
+                       && UART3_Rx_Buf[4] == 'F') {
+                led_set(LED_BLUE, LED_OFF);
+                led_set(LED_RED, LED_OFF);
+            }
+            for (int i = 0; i < UART3_Rx_cnt; i++)
+                UART3_Rx_Buf[i] = 0;
+            UART3_Rx_cnt = 0;
+            UART3_Rx_flg = 0;
+        }
+    }
 
     return 0;
 }
