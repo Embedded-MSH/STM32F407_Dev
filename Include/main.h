@@ -3,9 +3,12 @@
 
 #include "stm32f4xx_hal.h"
 
-void Error_Handler(void);
+namespace blinky {
 
-void sleepSecond(double second);
+void init();
+static void blinkTask(void* args);
+
+}   // namespace blinky
 
 
 #endif   //! __MAIN_H__
