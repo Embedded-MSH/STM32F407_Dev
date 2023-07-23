@@ -1,9 +1,43 @@
 #include "led.h"
 
-#include <stm32f4xx_hal.h>
+void LedCtrl::init(LED_ID id)
+{
+    if (id > LED_TOTAL)
+        return;
+    if (id == LED_TOTAL) {
+        for (int i = 0; i < LED_TOTAL; i++)
+            initOneLed(static_cast<LED_ID>(i));
+    } else {
+        initOneLed(id);
+    }
+}
 
+void LedCtrl::setLed(LED_ID id, LED_STATE state)
+{
+    if (id > LED_TOTAL)
+        return;
 
-static void led_init_one(enum led_id id)
+    if (id == LED_TOTAL) {
+        for (int i = 0; i < LED_TOTAL; i++)
+            setOneLed(static_cast<LED_ID>(i), state);
+    } else {
+        setOneLed(id, state);
+    }
+}
+
+void LedCtrl::toggleLed(LED_ID id)
+{
+    if (id > LED_TOTAL)
+        return;
+    if (id == LED_TOTAL) {
+        for (int i = 0; i < LED_TOTAL; i++)
+            toggleOneLed(static_cast<LED_ID>(i));
+    } else {
+        toggleOneLed(id);
+    }
+}
+
+void LedCtrl::initOneLed(LED_ID id)
 {
     GPIO_InitTypeDef GPIO_InitStruct = { 0 };
 
@@ -24,8 +58,7 @@ static void led_init_one(enum led_id id)
     HAL_GPIO_Init(gpio_port, &GPIO_InitStruct);
 }
 
-
-static void led_set_one(enum led_id id, enum led_state state)
+void LedCtrl::setOneLed(LED_ID id, LED_STATE state)
 {
     GPIO_TypeDef* gpio_port = id == LED_BLUE ? LED_BLUE_GPIO : LED_RED_GPIO;
     unsigned int gpio_pin = id == LED_BLUE ? LED_BLUE_PIN : LED_RED_PIN;
@@ -33,49 +66,9 @@ static void led_set_one(enum led_id id, enum led_state state)
     HAL_GPIO_WritePin(gpio_port, gpio_pin, pin_state);
 }
 
-
-static void led_toggle_one(enum led_id id)
+void LedCtrl::toggleOneLed(LED_ID id)
 {
     GPIO_TypeDef* gpio_port = id == LED_BLUE ? LED_BLUE_GPIO : LED_RED_GPIO;
     unsigned int gpio_pin = id == LED_BLUE ? LED_BLUE_PIN : LED_RED_PIN;
     HAL_GPIO_TogglePin(gpio_port, gpio_pin);
-}
-
-void led_init(enum led_id id)
-{
-    if (id > LED_TOTAL)
-        return;
-    if (id == LED_TOTAL) {
-        for (int i = 0; i < LED_TOTAL; i++)
-            led_init_one(i);
-    } else {
-        led_init_one(id);
-    }
-}
-
-
-
-void led_set(enum led_id id, enum led_state state)
-{
-    if (id > LED_TOTAL)
-        return;
-
-    if (id == LED_TOTAL) {
-        for (int i = 0; i < LED_TOTAL; i++)
-            led_set_one(i, state);
-    } else {
-        led_set_one(id, state);
-    }
-}
-
-void led_toggle(enum led_id id)
-{
-    if (id > LED_TOTAL)
-        return;
-    if (id == LED_TOTAL) {
-        for (int i = 0; i < LED_TOTAL; i++)
-            led_toggle_one(i);
-    } else {
-        led_toggle_one(id);
-    }
 }

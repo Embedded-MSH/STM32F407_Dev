@@ -1,5 +1,7 @@
 #include "main.h"
 
+#include "led.h"
+
 #include <FreeRTOS.h>
 #include <task.h>
 #include <timers.h>
@@ -16,29 +18,14 @@ static void blinky::blinkTask(void* arg)
 {
     for (;;) {
         vTaskDelay(500);
-        HAL_GPIO_TogglePin(LED_PORT, LED_PIN);
+        LedCtrl::instance()->toggleLed(LED_ID::LED_TOTAL);
     }
-}
-
-void blinky::init()
-{
-    GPIO_InitTypeDef GPIO_Config;
-
-    GPIO_Config.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIO_Config.Pull = GPIO_NOPULL;
-    GPIO_Config.Speed = GPIO_SPEED_FREQ_HIGH;
-
-    GPIO_Config.Pin = LED_PIN;
-
-    LED_PORT_CLK_ENABLE();
-    HAL_GPIO_Init(LED_PORT, &GPIO_Config);
 }
 
 int main(void)
 {
     SystemInit();
-    blinky::init();
-
+    LedCtrl::instance()->init(LED_ID::LED_TOTAL);
     xTaskCreate(blinky::blinkTask,
                 "blinky",
                 configMINIMAL_STACK_SIZE,

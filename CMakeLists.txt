@@ -75,9 +75,8 @@ set(LOCAL_LINKER_SYMBOL
 
 include_directories(./Include/)
 
-set(PROJECT_SOURCES
-    src/main.cpp
-    # src/led.c src/mock.c src/key.c src/msp.c src/usart.c src/tim.c
+set(PROJECT_SOURCES src/main.cpp src/led.cpp # src/mock.c src/key.c src/msp.c
+                                             # src/usart.c src/tim.c
 )
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Dprintf=printf_hook")
 if(CMAKE_BUILD_TYPE STREQUAL Debug)

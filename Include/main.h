@@ -5,7 +5,7 @@
 
 namespace blinky {
 
-void init();
+// void init();
 static void blinkTask(void* args);
 
 }   // namespace blinky
