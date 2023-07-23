@@ -5,7 +5,10 @@
 #include "tim.h"
 #include "usart.h"
 
+#include <FreeRTOS.h>
 #include <string.h>
+#include <task.h>
+#include <timers.h>
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
@@ -95,6 +98,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 
 void SystemClock_Config(void);
 
+void timerCallback()
+{
+    for (;;) {
+        vTaskDelay(500);
+        led_toggle(LED_BLUE);
+    }
+}
+
+
 int main(void)
 {
     /* Reset of all peripherals, Initializes the Flash interface and the
@@ -115,7 +127,41 @@ int main(void)
     HAL_UART_Receive_IT(&huart1, UART1_temp, REC_LENGTH);
     // HAL_UART_Receive_IT(&huart2, UART2_temp, REC_LENGTH);
     HAL_UART_Receive_IT(&huart3, UART2_temp, REC_LENGTH);
+
+    xTaskCreate(timerCallback,
+                "blinky",
+                configMINIMAL_STACK_SIZE,
+                NULL,
+                tskIDLE_PRIORITY + 1,
+                NULL);
+
+    vTaskStartScheduler();
     while (1) { }
 
     return 0;
+}
+
+void vApplicationTickHook(void)
+{
+}
+
+void vApplicationIdleHook(void)
+{
+}
+
+void vApplicationMallocFailedHook(void)
+{
+    taskDISABLE_INTERRUPTS();
+    for (;;)
+        ;
+}
+
+void vApplicationStackOverflowHook(TaskHandle_t pxTask, char* pcTaskName)
+{
+    (void)pcTaskName;
+    (void)pxTask;
+
+    taskDISABLE_INTERRUPTS();
+    for (;;)
+        ;
 }

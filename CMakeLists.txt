@@ -13,7 +13,28 @@ set(HAL_TYPE STM32::F4)
 
 set(OPENOCD_SCRIPTS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/openocd.cfg")
 message("OPENOCD_SCRIPTS_PATH: ${OPENOCD_SCRIPTS_PATH}")
+
+option(USE_CUBE_FREERTOS
+       "Use the FreeRTOS kernel provided by the Cube repository" ON)
 # ##############################################################################
+
+if(USE_CUBE_FREERTOS)
+  message(STATUS "Using FreeRTOS provided by Cube repository")
+else()
+  message(STATUS "Using FreeRTOS from kernel repository")
+endif()
+
+set(FREERTOS_NAMESPACE FreeRTOS)
+set(FREERTOS_COMP_LIST "")
+
+if(USE_CUBE_FREERTOS)
+  # The device family needs to be supplied as a component to use the Cube
+  # FreeRTOS sources
+  list(APPEND FREERTOS_COMP_LIST STM32F4)
+  set(FREERTOS_F4_NAMESPACE ${FREERTOS_NAMESPACE}::STM32::F4)
+else()
+  set(FREERTOS_F4_NAMESPACE ${FREERTOS_NAMESPACE})
+endif()
 
 find_package(
   CMSIS
@@ -32,8 +53,16 @@ find_package(
              TIM
   REQUIRED)
 
+find_package(
+  FreeRTOS
+  COMPONENTS ${FREERTOS_COMP_LIST}
+  REQUIRED)
+
 set(LOCAL_LINKER_SYMBOL
     -Wl,--no-warn-rwx-segments
+    ${FREERTOS_F4_NAMESPACE}::ARM_CM4F
+    ${FREERTOS_F4_NAMESPACE}::Timers
+    ${FREERTOS_F4_NAMESPACE}::Heap::1
     HAL::${HAL_TYPE}::RCC
     HAL::${HAL_TYPE}::GPIO
     HAL::${HAL_TYPE}::CORTEX
