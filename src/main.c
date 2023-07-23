@@ -88,7 +88,9 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
-    led_toggle(LED_BLUE);
+    if (htim->Instance == TIM6) {
+        HAL_IncTick();
+    }
 }
 
 void SystemClock_Config(void);
@@ -109,7 +111,7 @@ int main(void)
     // USART2_Init(115200);
     USART3_Init(115200);
 
-    MX_TIM6_Init();
+    // MX_TIM6_Init();
     HAL_UART_Receive_IT(&huart1, UART1_temp, REC_LENGTH);
     // HAL_UART_Receive_IT(&huart2, UART2_temp, REC_LENGTH);
     HAL_UART_Receive_IT(&huart3, UART2_temp, REC_LENGTH);

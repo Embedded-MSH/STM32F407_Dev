@@ -16,11 +16,12 @@ void HAL_MspInit(void)
     /* USER CODE END MspInit 1 */
 }
 
-void SysTick_Handler(void)
-{
-    HAL_IncTick();   // SysTick定时器是由HAL库进行管理的,用于生成系统滴答定时和延时函数。HAL需要通过重写SysTick
-                     // 调用 IncTick 获取滴答。
-}
+// void SysTick_Handler(void)
+// {
+//     HAL_IncTick();   //
+//     SysTick定时器是由HAL库进行管理的,用于生成系统滴答定时和延时函数。HAL需要通过重写SysTick
+//                      // 调用 IncTick 获取滴答。
+// }
 
 void sleepSecond(double second)
 {
