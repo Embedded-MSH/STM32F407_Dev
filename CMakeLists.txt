@@ -87,6 +87,6 @@ endif()
 
 add_custom_target(
   burn
-  COMMAND openocd -f ${OPENOCD_SCRIPTS_PATH} -d -c \"program
+  COMMAND openocd -f ${OPENOCD_SCRIPTS_PATH} -c \"program
           ${CMAKE_CURRENT_BINARY_DIR}/${burn_target} verify reset exit\"
   DEPENDS ${burn_target})
