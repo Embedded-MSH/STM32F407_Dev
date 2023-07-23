@@ -29,6 +29,7 @@ find_package(
              UART
              USART
              DMA
+             TIM
   REQUIRED)
 
 set(LOCAL_LINKER_SYMBOL
@@ -39,13 +40,21 @@ set(LOCAL_LINKER_SYMBOL
     HAL::${HAL_TYPE}::UART
     HAL::${HAL_TYPE}::USART
     HAL::${HAL_TYPE}::DMA
+    HAL::${HAL_TYPE}::TIM
+    HAL::${HAL_TYPE}::TIMEx
     CMSIS::${CMSIS_TYPE}
     STM32::NoSys)
 
 include_directories(./Include/)
 
-set(PROJECT_SOURCES src/main.c src/led.c src/mock.c src/key.c src/msp.c
-                    src/usart.c)
+set(PROJECT_SOURCES
+    src/main.c
+    src/led.c
+    src/mock.c
+    src/key.c
+    src/msp.c
+    src/usart.c
+    src/tim.c)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Dprintf=printf_hook")
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
   message("Debug
